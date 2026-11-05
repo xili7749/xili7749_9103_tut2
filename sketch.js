@@ -1,3 +1,5 @@
+// AI acknowledgement: ChatGPT/Codex assisted with generating, modifying and refining
+// the module integration, input handling and resizing in this module.
 // This file connects the environment, input and rendering modules.
 // The project owner specified the interactions and requested a faster seasonal cycle.
 

@@ -1,3 +1,5 @@
+// AI acknowledgement: ChatGPT/Codex assisted with generating, modifying and refining
+// the hidden corner hit testing in this module.
 // This helper detects the two hidden corner regions without drawing any interface.
 // The project owner specified the upper-right weather and lower-right day/night actions.
 

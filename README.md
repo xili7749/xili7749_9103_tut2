@@ -106,13 +106,9 @@ Compared with the earlier package, `Timer` no longer owns particles, input regio
 
 ## AI acknowledgement
 
-The project owner specified the intended interaction: automatic seasons, hidden upper-right weather control, hidden lower-right day/night control, winter snow and a faster season cycle. These are the human design decisions documented in the conversation.
+ChatGPT/Codex assisted with generating, modifying and refining parts of the project code, including season timing, colour transitions, rain and snow effects, hidden corner interactions, modular structure and the knitted visual style. The interaction requirements and design revisions were specified by the project owner.
 
-ChatGPT/Codex generated and revised the JavaScript implementation and HTML, including timing, interpolation, particle rendering, the placeholder scene, hit testing, input wiring and this modular refactor. It also assisted with comments, documentation and automated checks. The AI assistance is documented here and in AI_ACKNOWLEDGEMENT.md; source-code AI attribution comments have been removed at the project owner’s request. The generated implementation has not been relabelled as independently human-written code.
-
-The controller accumulates milliseconds, computes the season, blends colours and moves lighting/weather values towards their targets. The renderers read its state, while the input helper toggles targets. This separation makes each part easier to understand and replace.
-
-See `AI_ACKNOWLEDGEMENT.md` for a concise statement and file-by-file scope. This record applies only to this supplied component; the team should describe its other work separately. Any later independent contributions should be identified by the actual changes and development history, without assigning an unsupported human/AI percentage.
+The code uses elapsed time to calculate the current season, blends colours and lighting, and draws rain or snow from the shared environment state. Separate modules handle input, weather rendering and the demonstration scene. AI assistance is also acknowledged in the source-code comments; see `AI_ACKNOWLEDGEMENT.md` for the scope by file.
 
 ## External references
 

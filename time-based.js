@@ -1,3 +1,5 @@
+// AI acknowledgement: ChatGPT/Codex assisted with generating, modifying and refining
+// the season timing, colour transitions and environment state in this module.
 // This controller calculates the environment without drawing or reading mouse input.
 // The project owner specified the seasonal cycle, manual switches and winter snow.
 // Timing reference: https://p5js.org/reference/p5/deltaTime/

@@ -1,3 +1,5 @@
+// AI acknowledgement: ChatGPT/Codex assisted with generating, modifying and refining
+// the knitted textures, sheep and felt-style scenery in this module.
 // This renderer creates a knitted meadow with felt trees and curled wool sheep.
 // All textures are drawn in code, so no external image files are needed.
 // Texture buffer reference: https://p5js.org/reference/p5/createGraphics/

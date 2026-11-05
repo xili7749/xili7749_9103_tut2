@@ -1,3 +1,5 @@
+// AI acknowledgement: ChatGPT/Codex assisted with generating, modifying and refining
+// the rain and snow rendering in this module.
 // This renderer draws rain and snow from the environment snapshot.
 // The project owner requested rain in spring, summer and autumn, and snow in winter.
 

@@ -1,127 +1,101 @@
-# The Sky Is Made of Sheep — Knitted meadow
+# The Sky Is Made of Sheep — Interactive Storybook
 
-This folder contains the time-based member's p5.js module and a knitted-meadow demonstration. It is a component for the group project, not the complete team's final submission.
+A p5.js prototype combining the group's **Time-based**, **User Input**, and **Perlin Noise / Randomness** mechanics. The scene is a knitted meadow inside an open book. Its visual objects, shadows and instruments are drawn in code; no image assets are required.
 
-## Run and interact
+## Run
 
-Keep the entire folder together, including index.html, style.css and all five JavaScript files. Open `index.html` in a browser with an internet connection. The page loads p5.js 1.11.11 from jsDelivr. No image or audio assets are required. If the canvas does not appear, check the connection and browser console.
+Keep the folder intact and open `index.html` in a browser with an internet connection. The page loads p5.js 1.11.11 from jsDelivr. Audio starts only after clicking the gramophone. A wide browser window is recommended; on a phone, landscape orientation gives the book more space.
 
-The artwork contains **no visible text, buttons or icons**. Interaction uses two invisible regions directly against the right edge:
+This is a new integrated project. It does not replace the earlier time-based-only folder.
 
-- **Upper-right corner:** click to enable or disable weather. Spring, summer and autumn use rain; winter uses snow.
-- **Lower-right corner:** click to switch between day and night.
-- Touching the same regions performs the same actions on a touch device. No HTML buttons or keyboard controls are included in this version.
+## Interactions
 
-Each region is 22% of the canvas width (up to 180 pixels) and 25% of its height (up to 150 pixels). These regions resize with the canvas. Clicks elsewhere are available for the group's sheep interactions.
+| Action | Result |
+| --- | --- |
+| Click the narrow left edge of the book | A page-turn animation refreshes the whole flock and the clouds. Seasons and music continue. |
+| Hover over a sheep | A subtle stitched outline indicates the target. |
+| Press a sheep for less than 0.75 seconds, then release | It raises/turns its head towards the pointer. A wolf shadow opens its jaw or lifts a paw. |
+| Hold a sheep for at least 0.75 seconds, then release | Its wool expands while held. On release it becomes a cloud and rises into the sky. |
+| Drag a floating or rising cloud | Move it within the sky. On release it resumes slow independent drifting. |
+| Click clear ground | Add a randomly sized sheep at that point, if there is enough space. |
+| Press empty space and drag vertically | Up moves towards daytime, down towards night. Move about 185 logical book units for a full change. |
+| Move the pointer horizontally across the book | Change daylight shadow direction and extent. |
+| Click the gramophone record | Play or pause music. The record rotates while playing. |
+| Click the small left/right arrows below the gramophone | Choose the previous/next fixed track. |
 
-Seasons automatically progress from spring to summer, autumn and winter. Each season lasts 6 seconds (24 seconds for a full cycle); its last 1.5 seconds blend into the next colour palette. Weather fades on/off over approximately 1.2 seconds, and lighting changes over approximately 2 seconds. Both switches persist across season changes. At a winter boundary, the active particle type changes to snow; when spring starts, it changes back to rain. Rain and snow are not drawn together.
+The book contains no written UI labels. Sheep, clouds, the page edge and gramophone take precedence over empty-space gestures. A lighting drag never also creates a sheep. A short press and a long hold are intentionally different actions. Pointer capture prevents a drag from getting stuck if released outside the canvas.
 
-## Visual style
+## Behaviour
 
-The meadow uses a muted yarn-and-felt style: a cached knitted field, running stitches, six curled-wool sheep and layered felt trees. Small fibre marks and slight variations in the stitches give the surface a handmade character. Soft local shadows replace the long shadows of the earlier demo. Rain resembles pale threads, and winter snow uses warm-white dots. Everything is drawn with code; there are no external bitmap assets.
+### Random flock and wolf shadows
 
-The texture buffer is generated once during setup and rebuilt on resize, rather than regenerated every frame. It is drawn with reduced opacity at night. The timing, hidden input regions and rain/snow rules remain the same.
+A new page starts with 16–23 sheep. Sizes, positions, facing, small wool variations and behaviour parameters are assigned once when each sheep is created. Size-aware placement avoids other sheep, trees, the gutter and gramophone. A shuffled quarter of each initial flock receives wolf shadows (rounded to the nearest sheep). Later births and manually created sheep have a 25% wolf-shadow chance.
+
+Ordinary sheep have ordinary silhouettes. Wolf silhouettes remain translucent shadows, with ears, a muzzle, tail and paws. They move subtly when idle and become more active after the sheep is short-pressed. Shadow dimensions scale with the sheep. The wolf and night reference images mentioned in the request were not attached to the latest message, so these designs are interpretations rather than reference matches.
+
+### Clouds, rain and new sheep
+
+Clouds rise from transformed sheep, or begin in the sky when a page is generated. The main sketch passes the real p5 `noise()` function into the randomness module. Each cloud has an independent noise offset. Nearby noise samples create gentle changing velocities rather than random jumps.
+
+After 8–14 seconds of floating, a cloud begins a 3-second ending. About 38% of clouds attempt to rain; others break into small cross-shaped fragments and disappear. A rain cloud chooses a free landing position and grows one new sheep there. The newborn's growth and the cloud's opacity use the same smooth progress, so the sheep becomes fully visible as the cloud disappears. In winter, the cloud emits snow instead of rain while keeping the same birth behaviour. Dissolving/raining clouds are no longer draggable.
+
+The project caps the flock at 36 and the cloud count at 14. If there is no safe birth position or capacity, the cloud dissolves without spawning. If the cloud limit is reached, releasing a long-held sheep makes it look up instead of deleting it. A dragged cloud pauses its lifetime and receives at least 3 seconds of further floating after release.
+
+### Time and environment
+
+Seasons automatically cycle every 6 seconds, with a 1.5-second colour transition. The full cycle takes 24 seconds. Trees change colour; spring has embroidered flowers, autumn has scattered leaves, and winter has pale tree tops and drifting snow. Night is blue-grey rather than black. Its stars, moon and randomly coloured glowing eyes remain visible. Eye colours change independently of music.
+
+Day/night is controlled by the vertical gesture, with smooth lighting transitions. It is not automatically switched by a new season. Time is supplied from `deltaTime`; long frame gaps are capped and hidden-tab animation is paused to avoid sudden jumps.
+
+### Music-controlled behaviour
+
+The three built-in tracks are fixed original note sequences synthesised with Web Audio. They are not commercial recordings and do not need audio downloads. Music is a **behaviour switch**, not an input for beat or amplitude analysis.
+
+- **Day + music:** only wolf-shadow sheep move around small random ellipses, with their shadows moving along in pursuit. Proposed movement is rejected if it would overlap another sheep or enter an obstacle.
+- **Night + music:** sheep independently choose jump delays, durations and heights. Heights stay between 7 and 28 logical units. No jumps are synchronised to the musical beat.
+- **Music paused:** running and jumping stop; ordinary environment changes and night eye glow continue.
+
+To use your own recordings, put the files in an `assets/` folder and edit `src` in `music.js`, for example `src: 'assets/track-1.mp3'`. Keep each track's `src: null` to use its synthesised melody. The track names and built-in note arrays are also in that file. Referencing a local recording requires including that recording in the submitted folder.
+
+## Structure and ownership
+
+| File | Responsibility |
+| --- | --- |
+| `time-based.js` | `TimeEnvironment`: repeating seasons, colour blending, day/night brightness and smoothed sunlight direction. Time-based role: Zixiang Zhu, according to the supplied concept. |
+| `user-input.js` | `UserInputMechanic`: hit testing priority, short/long press distinction, pointer capture, cloud dragging, page input, lighting gestures and music controls. User Input role: Xinyu Li, according to the concept. |
+| `noise-random.js` | `NoiseRandomMechanic`: seeded flock variation, random wolf selection, Perlin cloud movement, cloud endings, rain births, eye colours, jumps and collision-safe chase movement. Noise/Randomness role: Wenjia Zhao (Isabella), according to the concept. |
+| `music.js` | Shared fixed-track playback and rotating-record state. |
+| `renderer.js` | Shared book, yarn scenery, silhouettes, animations and instrument drawing. |
+| `settings.js` | Shared settings and small mathematical helpers. |
+| `sketch.js` | Creates the modules, updates them once per frame, maps canvas coordinates and draws the book. |
+
+These ownership labels reflect the planned team responsibilities, not claims that the supplied implementation was independently written by those people. The modules share objects through explicit constructor arguments. Time receives seconds; the renderer reads state and does not randomise appearances while drawing.
+
+### Important settings
+
+Edit `settings.js` to change season speed, the 0.75-second hold threshold, flock counts, wolf fraction, limits and cloud rain probability. Cloud lifetime and ending duration are in `noise-random.js`. Jump height bounds are in `updateSheep()`. All positions use a 1200 × 760 logical coordinate system, uniformly scaled and centred on resize, so hit testing and graphics stay aligned.
 
 ## Inspiration
 
-The supplied group concept, *The Sky Is Made of Sheep*, imagines an interactive pasture where sheep can become clouds. Its landscape references informed the top-down meadow, small flock, directional shadows and seasonal palettes. Gradual changes in colour and brightness suggest the passage of time. The fixed sheep and trees here are placeholders for the other members' work.
-
-The team's final README should include the original links and credits for its visual and transformation references; they are not invented here.
-
-## Techniques and design decisions
-
-- **Time:** `Timer.update(deltaTime)` accumulates milliseconds. Division and modulo determine the current season and progress. This keeps season duration independent of frame count.
-- **Colours:** `Timer.mix()` uses `a + (b - a) * t` for each RGB channel. `Timer.smooth()` uses the curve `t²(3 − 2t)` to soften the start and end of seasonal transitions. Night palettes retain some seasonal colour.
-- **Transitions:** `moveTowards()` moves a value towards a target without overshooting it. The weather and night targets are independent, and another click can reverse an unfinished transition.
-- **Rain and snow:** A pool of 240 particle descriptors is created once. Between 60 and 240 particles are drawn according to the viewport area. Rain uses fast, slanted lines. Snow uses small, slower circles with sinusoidal horizontal drift. Rendering is skipped when weather is fully off. The weather type follows the current season, independently of the colour blend near its end.
-- **Input:** `handleClick()` checks only the hidden corner regions and returns whether the click was consumed. This prevents a corner interaction from also creating a sheep. `touchStarted()` prevents the default browser action; a short timestamp guard ignores a duplicate mouse event after touch.
-- **Efficiency:** Sheep positions, wool spiral points and particle descriptors are initialized once. Wool colours are calculated once per frame. The dense fabric texture is cached in a p5.Graphics buffer and rebuilt only on resize; the old buffer is removed first. Interaction regions are cached until the canvas dimensions change. There are no control elements to update in the DOM.
-- **Resizing:** The canvas follows the window, object positions use normalized coordinates, and object scale follows the viewport. Pixel density is capped at 2.
-
-## File structure and mechanic ownership
-
-| File / mechanic | Responsibility |
-| --- | --- |
-| `time-based.js` | `Timer`: computes the environment state. No p5 drawing or mouse handling. Time-based responsibility is assigned to Zixiang Zhu in the concept presentation; this is a role assignment, not a claim of independent code authorship. |
-| `weather.js` | `WeatherRenderer`: draws rain or snow from an environment snapshot. |
-| `corner-input.js` | `CornerInput`: detects the two hidden regions and calls `toggleWeather()` or `toggleNight()`. This is a helper for this environment demo, not the other member's full User Input mechanic. |
-| `scene.js` | `MeadowScene`: draws the placeholder meadow, trees and sheep. Replace it when integrating the real group scene. |
-| `sketch.js` | Sets the timing values, creates the objects and connects the p5 lifecycle functions. |
-| `index.html` | Loads p5.js, the environment module and the sketch. Contains no buttons. |
-| User Input | Xinyu Li, according to the concept. Sheep creation/transformation and pointer-controlled shadows are to be integrated from that member's module. |
-| Perlin Noise / Randomness | Wenjia Zhao (Isabella), according to the concept. Flock variation, cloud drift and music-enabled variation are to be integrated from that member's module. |
-
-## Module flow and integration
-
-`sketch.js` updates `Timer`, takes one environment snapshot, then sends that same snapshot to `MeadowScene` and `WeatherRenderer`. `CornerInput` only changes the controller's targets; it does not draw or calculate transitions. The scene also uses the small `Timer.mix()` colour helper.
-
-The HTML loads the files in this order: `time-based.js`, `weather.js`, `corner-input.js`, `scene.js`, `sketch.js`. These are separate script files using p5 global mode, so no package manager or build step is needed.
-
-To integrate with the group's scene, keep the first three helper modules and merge these calls into the existing lifecycle functions. Do not overwrite the group's main sketch or define duplicate lifecycle functions.
-
-```js
-// Declare these objects at sketch scope.
-let timer;
-let weather;
-let cornerInput;
-
-// Create the objects inside the existing setup() function.
-timer = new Timer({ seasonLength: 6000, transitionLength: 1500 });
-weather = new WeatherRenderer();
-cornerInput = new CornerInput();
-
-// At the start of the existing draw(), update time and read the shared state.
-timer.update(deltaTime);
-const environment = timer.getState();
-
-// Draw the group's scene here, using the environment colours and brightness.
-
-// At the end of draw(), place rain or snow over the scene.
-weather.draw(environment, width, height);
-
-// At the start of mousePressed(), let the hidden corners consume their own clicks.
-if (cornerInput.handleClick(mouseX, mouseY, width, height, timer)) return;
-// Continue with the group's sheep interaction for other positions.
-```
-
-This excerpt shows where each call belongs; it is not a complete standalone sketch. Copy the touch handling from `sketch.js` if needed, keeping the guard against duplicate mouse events. To change the demo pace, edit `SETTINGS` at the top of `sketch.js`; values are in milliseconds.
-
-The state snapshot provides:
-
-| Field | Meaning |
-| --- | --- |
-| `season` / `seasonName` | Season index (0 spring, 1 summer, 2 autumn, 3 winter) and English name. The name is not drawn. |
-| `elapsed` / `springAmount` | Elapsed milliseconds for particle motion and the blended spring weight for flowers. |
-| `seasonProgress` | Progress from 0 to 1 within the current season. |
-| `isNight` / `nightMix` | Night flag, switching halfway through the transition, and its 0–1 transition value. |
-| `brightness` / `shadowAlpha` | Scene brightness and shadow visibility. Input still controls shadow direction and length. |
-| `grassColour` / `treeColour` / `skyColour` | RGB arrays for the scene renderer. Use `fill(...environment.grassColour)`, for example. |
-| `weatherEnabled` / `weatherAmount` | Weather switch and fading intensity. |
-| `weatherType` | `rain` outside winter, `snow` in winter, even when the weather switch is off. |
-| `rainAmount` / `snowAmount` | Separate intensity values; only the active type can be nonzero. |
-
-Use p5's default RGB 0–255 colour mode when applying the colour arrays. Call `getState()` again after every update to obtain a fresh snapshot. `getSeasonWeight(index)` can fade seasonal details with the same palette transition.
-
-Compared with the earlier package, `Timer` no longer owns particles, input regions or drawing methods. Use `weather.draw(environment, width, height)` for weather and `cornerInput.handleClick(..., timer)` for input. Use `cornerInput.getRegions(width, height)` when refreshing the input layout.
+The supplied concept *The Sky Is Made of Sheep* inspires the meadow and sheep-to-cloud transformation. The later project request introduced the book, wolf silhouettes, tactile knitted style, cloud-to-sheep cycle and gramophone. The team's final repository should include its actual visual reference links and credits. The missing wolf/night reference images have not been reproduced or attributed here.
 
 ## AI acknowledgement
 
-ChatGPT/Codex assisted with generating, modifying and refining parts of the project code, including season timing, colour transitions, rain and snow effects, hidden corner interactions, modular structure and the knitted visual style. The interaction requirements and design revisions were specified by the project owner.
+ChatGPT/Codex assisted with generating, modifying and refining this integrated prototype, including the three mechanics, shared rendering, music synthesis, comments, documentation and development checks. The project owner specified the interactions, seasonal rules and requested revisions. Source files include English acknowledgement comments and explanations of their purpose.
 
-The code uses elapsed time to calculate the current season, blends colours and lighting, and draws rain or snow from the shared environment state. Separate modules handle input, weather rendering and the demonstration scene. AI assistance is also acknowledged in the source-code comments; see `AI_ACKNOWLEDGEMENT.md` for the scope by file.
+The implementation accumulates time for seasons and transitions, uses random choices for stable variation and independent responses, samples Perlin noise for cloud velocities, and routes pointer gestures to the appropriate object or action. The team should review the code and record later work actually completed by each member. This package does not create or invent GitHub commits.
 
 ## External references
 
-- [p5.js deltaTime](https://p5js.org/reference/p5/deltaTime/) — elapsed-frame timing API.
-- [p5.js lerpColor](https://p5js.org/reference/p5/lerpColor/) — colour interpolation reference. This module uses an independent RGB-array helper rather than calling `lerpColor()`.
-- [p5.js createGraphics](https://p5js.org/reference/p5/createGraphics/) — offscreen texture caching.
-- [p5.js drawingContext](https://p5js.org/reference/p5/drawingContext/) — opacity and dashed seam lines through the Canvas 2D context.
-- [p5.js](https://p5js.org/) — rendering library, loaded from the pinned CDN URL in the HTML.
+- [p5.js deltaTime](https://p5js.org/reference/p5/deltaTime/) — frame duration passed into time-dependent updates.
+- [p5.js noise](https://p5js.org/reference/p5/noise/) — smoothly varying cloud velocities.
+- [p5.js createGraphics](https://p5js.org/reference/p5/createGraphics/) — cached knitted texture.
+- [MDN pointer capture](https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture) — reliable mouse/touch release handling beyond the canvas.
+- [MDN Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) — oscillators and gain envelopes for the original demo tracks.
+- [Marsaglia, Xorshift RNGs](https://www.jstatsoft.org/article/view/v008i14) — the small xorshift32 generator used for reproducible random flock tests. It is not used for security.
 
-The code also includes the timing and interpolation references. No third-party sheep or weather implementation was copied into this prototype.
+## Validation and limits
 
-## Submission and validation status
+Development checks covered 60 seeded flocks, wolf counts, initial spacing, page resets, short and long sheep presses, cloud release and drifting, empty-ground creation, vertical lighting gestures, synchronised rain births, dry cloud dissolution, daytime chase spacing and bounded night jumps. Offline drawing checks exercised every module, registered pointer callbacks, resizing and the texture cache. A mock Web Audio context checked playback scheduling, pause cleanup, track selection and asynchronous cancellation.
 
-This folder preserves a separate mechanic file, English explanatory code comments and an AI acknowledgement. The final group repository still needs the other members' modules and references, and each member's own meaningful development commits. The supplied brief requires at least three per member, excluding initial setup; this package does not fabricate a commit history.
-
-JavaScript syntax, the 6-second season cycle, rain/snow selection, persistent switches, transition reversal, hidden-region boundaries, frame-rate independence and drawing calls were checked. Desktop and narrow-screen output was inspected using an offline Canvas adapter. These checks are not real browser testing. Actual p5.js browser rendering, native touch/mouse behaviour and integration with the other members' modules still require verification in the final project.
+These checks do not replace actual p5.js browser, audible playback or real pointer-device testing. The provided previews are offline Canvas renderings. Browser interactions and audio still need to be checked on the presentation computer. The current wolf silhouette and night palette can be revised when the intended reference images are supplied.

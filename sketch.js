@@ -1,71 +1,37 @@
-// AI acknowledgement: ChatGPT/Codex assisted with generating, modifying and refining
-// the module integration, input handling and resizing in this module.
-// This file connects the environment, input and rendering modules.
-// The project owner specified the interactions and requested a faster seasonal cycle.
-
-// These settings control the pace of the automatic season changes.
-const SETTINGS = {
-  seasonLength: 6000,
-  transitionLength: 1500
-};
-
-// Each object has one job: state, weather drawing, scene drawing or input detection.
-let timer;
-let weather;
-let scene;
-let cornerInput;
-
-// Store the last touch time to avoid processing the same action as a mouse click.
-let lastTouchTime = -Infinity;
-
+// Connect the three mechanics and render the book in a fixed logical coordinate system.
+// ChatGPT/Codex assisted with generating, modifying and refining this code.
+let environment, world, input, music, renderer, canvas;
+let viewport = { scale: 1, x: 0, y: 0 };
 function setup() {
-  // Create the full-window canvas and attach it to the page if a container exists.
-  const canvas = createCanvas(windowWidth, windowHeight);
-  if (document.getElementById('canvas-host')) canvas.parent('canvas-host');
-  pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
-
-  // Create the modules once instead of rebuilding them in draw().
-  timer = new Timer(SETTINGS);
-  weather = new WeatherRenderer();
-  scene = new MeadowScene();
-  cornerInput = new CornerInput();
-
-  // Describe the hidden interactions for screen readers without adding visible text.
-  describe('A meadow cycles through four seasons. Click the upper-right corner to toggle rain or winter snow. Click the lower-right corner to switch day and night.');
+  canvas=createCanvas(windowWidth,windowHeight);
+  canvas.parent('canvas-host');
+  pixelDensity(Math.min(window.devicePixelRatio||1,2));
+  environment=new TimeEnvironment();
+  world=new NoiseRandomMechanic((x,y)=>noise(x,y));
+  music=new MusicPlayer();
+  input=new UserInputMechanic(world,environment,music);
+  renderer=new StoryRenderer();
+  updateViewport();
+  input.bind(canvas,(clientX,clientY)=>{
+    const bounds=canvas.elt.getBoundingClientRect();
+    return {x:(clientX-bounds.left-viewport.x)/viewport.scale,y:(clientY-bounds.top-viewport.y)/viewport.scale};
+  });
+  describe('An interactive knitted storybook. Click its left edge to turn the page. Short-press sheep to look, long-press and release to turn them into clouds. Drag clouds. Click clear grass to add sheep. Drag empty space up for day and down for night. Move sideways to change shadows. Click the gramophone record to play or pause and its arrows to change tracks.');
 }
-
 function draw() {
-  // Update time first so both renderers use the same state in this frame.
-  timer.update(deltaTime);
-  const environment = timer.getState();
-
-  // Draw the meadow before placing the weather over it.
-  scene.draw(environment);
-  weather.draw(environment, width, height);
+  // Ignore time spent in a hidden tab, and limit large jumps after a stalled frame.
+  const dt=document.hidden?0:Math.min(Math.max(deltaTime/1000,0),0.08);
+  input.update(dt);environment.update(dt);music.update(dt);world.update(dt,environment,music.playing);
+  background('#b9a58c');
+  push();translate(viewport.x,viewport.y);scale(viewport.scale);
+  renderer.draw(world,environment,input,music);
+  pop();
+  const hovering=input.hoverSheep||input.hoverCloud||input.musicAction(world.pointer)||(input.inBook(world.pointer)&&world.pointer.x<=108);
+  cursor(input.active?'grabbing':hovering?'pointer':'default');
 }
-
-function mousePressed() {
-  // Ignore a synthetic mouse event that arrives just after a touch.
-  if (millis() - lastTouchTime < 500) return;
-  if (cornerInput.handleClick(mouseX, mouseY, width, height, timer)) return;
-
-  // Add the group's sheep interaction here for clicks outside the hidden corners.
+function updateViewport() {
+  viewport.scale=Math.min(width/STORY_SETTINGS.width,height/STORY_SETTINGS.height);
+  viewport.x=(width-STORY_SETTINGS.width*viewport.scale)/2;
+  viewport.y=(height-STORY_SETTINGS.height*viewport.scale)/2;
 }
-
-function touchStarted() {
-  // Handle the first finger and prevent the browser from scrolling the canvas.
-  if (touches.length !== 1) return false;
-  lastTouchTime = millis();
-  const touch = touches[0];
-  if (cornerInput.handleClick(touch.x, touch.y, width, height, timer)) return false;
-
-  // Add the group's touch interaction here for positions outside the hidden corners.
-  return false;
-}
-
-function windowResized() {
-  // Update object scale and corner regions after resizing the canvas.
-  resizeCanvas(windowWidth, windowHeight);
-  scene.resize();
-  cornerInput.getRegions(width, height);
-}
+function windowResized(){input.cancel();resizeCanvas(windowWidth,windowHeight);updateViewport();}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#261b14">
+  <title>The Sheep — An enchanted field journal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="stage" aria-label="An interactive flock in an old storybook"></main>
+  <div id="loading">Preparing a little wonder…</div>
+  <nav id="controls" hidden aria-hidden="true" aria-label="Storybook controls">
+    <button id="open-button">Open storybook</button>
+    <button id="flock-button" hidden>← New flock</button>
+    <button id="season-button" hidden>Next season →</button>
+    <button id="night-button" hidden>Day / Night</button>
+    <button id="help-button" aria-expanded="false">Help ?</button>
+  </nav>
+  <div id="cassette-controls" aria-label="Cassette playback controls">
+    <button id="music-button" aria-label="Play music" title="Play / Pause (M)">▷</button>
+    <button id="track-button" aria-label="Restart recording" title="Restart recording (T)">›</button>
+  </div>
+  <aside id="help" hidden>
+    <h1>The Sheep <span>A living storybook</span></h1>
+    <p>Click the clasp to open the book. Use the lower-left page corner for a new flock and the lower-right corner for the next season.</p>
+    <p>Hold a sheep until its wool expands, then release to turn it into a cloud. The sheep leaves the meadow.</p>
+    <p>Drag a cloud and release it to let it drift again. Some clouds produce rain, gradually creating a new sheep.</p>
+    <p>Click empty grass to add a sheep. Drag up or down to adjust daylight. Move the pointer around during the day to change shadow directions.</p>
+    <p>Click the cassette to play or pause, and the small arrow beside it to restart the recording. Sheep dance at night; during the day, wolf shadows emerge as wolves and chase the sheep.</p>
+    <p class="small">Keyboard: Enter to open · ← new flock · → next season · N day/night · M music · T restart recording · H help. Day and night also change gradually over time.</p>
+  </aside>
+  <div id="announcement" role="status" aria-live="polite"></div>
+  <script src="p5.min.js"></script>
+  <script src="settings.js"></script>
+  <script src="noise-random.js"></script>
+  <script src="time-based.js"></script>
+  <script src="renderer.js"></script>
+  <script src="user-input.js"></script>
+  <script src="music.js"></script>
+  <script src="sketch.js"></script>
+</body>
+</html>
